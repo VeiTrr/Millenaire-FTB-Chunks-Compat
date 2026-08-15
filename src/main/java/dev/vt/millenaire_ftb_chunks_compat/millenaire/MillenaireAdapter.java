@@ -5,10 +5,12 @@ import dev.vt.millenaire_ftb_chunks_compat.Mil_ftb_c_compat;
 import dev.vt.millenaire_ftb_chunks_compat.api.VillageData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import org.millenaire.building.BuildingInstance;
 import org.millenaire.culture.Culture;
 import org.millenaire.culture.ModCultures;
@@ -20,15 +22,15 @@ import java.util.*;
 
 public class MillenaireAdapter {
 
-    public static List<VillageData> getActiveVillages() {
+    public static List<VillageData> getActiveVillages(ResourceKey<Level> dimensionKey) {
         List<VillageData> result = new ArrayList<>();
 
         try {
             MinecraftServer server = Minecraft.getInstance().getSingleplayerServer();
-            if (server != null) {
-                ServerLevel overworld = server.overworld();
-                if (overworld != null) {
-                    VillageSavedData vsd = VillageSavedData.get(overworld);
+            if (server != null && dimensionKey != null) {
+                ServerLevel level = server.getLevel(dimensionKey);
+                if (level != null) {
+                    VillageSavedData vsd = VillageSavedData.get(level);
                     if (vsd != null) {
                         VillageManager vm = vsd.getVillageManager();
                         if (vm != null && vm.getAllVillages() != null) {
@@ -43,10 +45,14 @@ public class MillenaireAdapter {
                 }
             }
         } catch (Throwable t) {
-            Mil_ftb_c_compat.LOGGER.error("[MillenaireAdapter] Error in getActiveVillages", t);
+            Mil_ftb_c_compat.LOGGER.error("[MillenaireAdapter] Error in getActiveVillages for dimension " + dimensionKey, t);
         }
 
         return result;
+    }
+
+    public static List<VillageData> getActiveVillages() {
+        return getActiveVillages(Level.OVERWORLD);
     }
 
     private static VillageData convertMillenaireVillage(Village village) {
@@ -80,6 +86,7 @@ public class MillenaireAdapter {
             int color = getCultureColor(cultureKey);
             VillageData data = new VillageData(name, cultureKey, centerPos, 90, color);
 
+            // 1. Extract exact village chunks directly from Millenaire
             Set<ChunkPos> chunkSet = village.getLoadedChunks();
             if (chunkSet == null || chunkSet.isEmpty()) {
                 chunkSet = village.computeVillageChunks();
@@ -93,6 +100,7 @@ public class MillenaireAdapter {
                 }
             }
 
+            // 2. Fallback to radius if no chunks were returned
             if (data.getExactChunks().isEmpty()) {
                 populateChunksFromRadius(data);
             }
@@ -129,12 +137,14 @@ public class MillenaireAdapter {
         if (cultureKey == null) return Config.defaultCultureColor;
         String key = cultureKey.toLowerCase(Locale.ROOT);
 
+        // 1. Check user-configured culture colors
         for (Map.Entry<String, Integer> entry : Config.cultureColors.entrySet()) {
             if (key.contains(entry.getKey())) {
                 return entry.getValue();
             }
         }
 
+        // 2. Dynamic lookup in Millenaire's ModCultures registry
         try {
             Map<ResourceLocation, Culture> allCultures = ModCultures.getAllCultures();
             if (allCultures != null) {
@@ -148,6 +158,7 @@ public class MillenaireAdapter {
         } catch (Throwable ignored) {
         }
 
+        // 3. Deterministic HSB fallback for unknown/addon cultures
         return generateColorFromKey(key);
     }
 

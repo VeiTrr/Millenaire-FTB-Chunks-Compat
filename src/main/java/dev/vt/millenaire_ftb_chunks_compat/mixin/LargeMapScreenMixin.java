@@ -21,7 +21,7 @@ public abstract class LargeMapScreenMixin {
         try {
             if (this.dimension != null) {
                 for (MapRegion region : this.dimension.getRegions().values()) {
-                    region.update(true); // Trigger FTB Chunks map texture re-bake with injected village colors
+                    region.update(true);
                 }
             }
         } catch (Throwable ignored) {

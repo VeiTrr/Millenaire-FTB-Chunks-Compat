@@ -63,17 +63,10 @@ To build the mod from source:
 ./gradlew build
 ```
 
-The output JAR file will be located in `build/libs/millenaire_ftb_chunks_compat-1.21.1-0.1.jar`.
+The output JAR file will be located in `build/libs/millenaire_ftb_chunks_compat-<minecraft_version>-<version>.jar`.
 
 ---
 
 ## 📄 License
 
 This project is licensed under the [GNU Lesser General Public License v3.0 (LGPL-3.0)](LICENSE).
-
----
-
-## 🔗 Repository & Issues
-
-- **GitHub Repository**: [https://github.com/VeiTrr/Millenaire-FTB-Chunks-Compat](https://github.com/VeiTrr/Millenaire-FTB-Chunks-Compat)
-- **Issue Tracker**: [https://github.com/VeiTrr/Millenaire-FTB-Chunks-Compat/issues](https://github.com/VeiTrr/Millenaire-FTB-Chunks-Compat/issues)

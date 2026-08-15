@@ -7,6 +7,8 @@ import dev.ftb.mods.ftbteams.api.Team;
 import dev.vt.millenaire_ftb_chunks_compat.Config;
 import dev.vt.millenaire_ftb_chunks_compat.client.ClientVillageCache;
 import dev.vt.millenaire_ftb_chunks_compat.client.VirtualVillageTeam;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,11 +40,20 @@ public abstract class MapChunkMixin {
         }
 
         try {
+            if (this.region == null || this.region.dimension == null) {
+                return;
+            }
+
+            ResourceKey<Level> dimKey = this.region.dimension.dimension;
+            if (dimKey == null) {
+                return;
+            }
+
             RenderMapImageTask.setAlwaysRenderChunksOnMap(true);
 
             XZ pos = this.getActualPos();
             if (pos != null) {
-                VirtualVillageTeam team = ClientVillageCache.getVillageTeam(pos.x(), pos.z());
+                VirtualVillageTeam team = ClientVillageCache.getVillageTeam(dimKey, pos.x(), pos.z());
                 if (team != null) {
                     if (!villageTextureTriggered && this.region != null) {
                         villageTextureTriggered = true;
@@ -62,9 +73,18 @@ public abstract class MapChunkMixin {
         }
 
         try {
+            if (this.region == null || this.region.dimension == null) {
+                return;
+            }
+
+            ResourceKey<Level> dimKey = this.region.dimension.dimension;
+            if (dimKey == null) {
+                return;
+            }
+
             XZ pos = this.getActualPos();
             if (pos != null) {
-                VirtualVillageTeam team = ClientVillageCache.getVillageTeam(pos.x(), pos.z());
+                VirtualVillageTeam team = ClientVillageCache.getVillageTeam(dimKey, pos.x(), pos.z());
                 if (team != null) {
                     cir.setReturnValue(Optional.of(DUMMY_DATE));
                 }
