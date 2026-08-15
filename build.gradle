@@ -136,7 +136,7 @@ publishMods {
         projectId = project.hasProperty("curseforge_project_id") ? project.property("curseforge_project_id") : "0"
         minecraftVersions.add(project.minecraft_version)
         clientRequired = true
-        serverRequired = false
+        serverRequired = true
         displayName = "[NeoForge] " + project.mod_name + " " + project.version
         requires {
             slug = "ftb-chunks-forge"
